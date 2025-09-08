@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "social app",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints related to user authentication"
+    }
+  ],
+  "paths": {
+    "/auth/signup": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "signup",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "username": "mostafa Mnesesy",
+                "email": "mneseym@gmail.com",
+                "password": "Password1",
+                "confirmPassword": "Password1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "login",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "email": "mneseym@gmail.com",
+                "password": "Password1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/Confirm-Email": {
+      "patch": {
+        "tags": ["Authentication"],
+        "summary": "ConfirmEmail",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "email": "mneseym@gmail.com",
+                "otp": "771117"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
