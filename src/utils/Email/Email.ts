@@ -3,9 +3,8 @@ import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { BadRequestException } from "../error.response";
 import { log } from "node:console";
-interface IEmail extends Mail.Options {
-  otp: string;
-}
+import { IEmail } from "../interfaces/interfaces";
+
 export const sendEmail = async (data: IEmail): Promise<void> => {
   if (!data.to && !data.attachments?.length && !data.html && !data.text)
     throw new BadRequestException("missing to or attachment");

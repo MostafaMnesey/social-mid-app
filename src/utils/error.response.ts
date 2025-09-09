@@ -1,9 +1,7 @@
 import { log } from "console";
 import { Request, Response, NextFunction } from "express";
+import { IError } from "./interfaces/interfaces";
 
-export interface IError extends Error {
-  statusCode: number;
-}
 
 export class ApplicationException extends Error {
   statusCode: number = 500;
@@ -45,7 +43,6 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  log(err.statusCode);
   return res.status(err.statusCode || 500).json({
     error: "Internal server error",
     Type: err.name,

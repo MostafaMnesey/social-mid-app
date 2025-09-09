@@ -1,12 +1,4 @@
-/* export interface IloginDTO {
-  email: string;
-  password: string;
-}
 
-export interface IsignupDTO extends IloginDTO {
-  username: string;
-}
- */
 
 import z from "zod";
 import * as validator from "./auth.validation";

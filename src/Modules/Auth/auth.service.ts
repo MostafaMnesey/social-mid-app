@@ -5,11 +5,13 @@ import {
   NotFoundException,
 } from "../../utils/error.response";
 import { IConfirmEmailDTO, IloginDTO, IsignupDTO } from "./auth.dto";
-import UserModel, { type IUser } from "../../DB/models/user";
+import UserModel from "../../DB/models/user";
 import { UserRepository } from "../../DB/Repos/UserRepository";
 import { compareHash, generateHash } from "../../utils/security/hash";
 import event from "../../utils/Events/Email.event";
 import { generateOtp } from "../../utils/Otp/otp";
+import { createLoginTokens, generateToken } from "../../utils/security/token";
+import { IUserAuth } from "../../utils/interfaces/interfaces";
 class AuthService {
   // Db model
   private usermodel = new UserRepository(UserModel);
@@ -52,13 +54,29 @@ class AuthService {
     return res.status(201).json({ message: "signup successful", data: user });
   };
   // login service
-  login = (req: Request, res: Response): Response => {
+  login = async (req: Request, res: Response): Promise<Response> => {
     // Destructuring
     const { email, password }: IloginDTO = req.body;
+    const user = await this.usermodel.findOne({
+      filter: { email },
+    });
 
-    return res
-      .status(200)
-      .json({ message: "login successful", data: req.body });
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    if (!user.confirmedAt) {
+      throw new ConflictException("Email not confirmed");
+    }
+    if (!(await compareHash(password, user.password as string))) {
+      throw new BadRequestException("Invalid password");
+    }
+
+    const tokens = await createLoginTokens(user);
+
+    return res.status(200).json({
+      message: "login successful",
+      tokens,
+    });
   };
   ConfirmEmail = async (req: Request, res: Response): Promise<Response> => {
     // Destructuring
@@ -79,6 +97,9 @@ class AuthService {
     });
 
     return res.status(200).json({ message: "Email confirmed successfully" });
+  };
+  user = async (req: IUserAuth, res: Response): Promise<Response> => {
+    return res.status(200).json({ message: "user", data: req.user });
   };
 }
 

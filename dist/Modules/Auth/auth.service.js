@@ -9,6 +9,7 @@ const UserRepository_1 = require("../../DB/Repos/UserRepository");
 const hash_1 = require("../../utils/security/hash");
 const Email_event_1 = __importDefault(require("../../utils/Events/Email.event"));
 const otp_1 = require("../../utils/Otp/otp");
+const token_1 = require("../../utils/security/token");
 class AuthService {
     // Db model
     usermodel = new UserRepository_1.UserRepository(user_1.default);
@@ -50,12 +51,26 @@ class AuthService {
         return res.status(201).json({ message: "signup successful", data: user });
     };
     // login service
-    login = (req, res) => {
+    login = async (req, res) => {
         // Destructuring
         const { email, password } = req.body;
-        return res
-            .status(200)
-            .json({ message: "login successful", data: req.body });
+        const user = await this.usermodel.findOne({
+            filter: { email },
+        });
+        if (!user) {
+            throw new error_response_1.NotFoundException("User not found");
+        }
+        if (!user.confirmedAt) {
+            throw new error_response_1.ConflictException("Email not confirmed");
+        }
+        if (!(await (0, hash_1.compareHash)(password, user.password))) {
+            throw new error_response_1.BadRequestException("Invalid password");
+        }
+        const tokens = await (0, token_1.createLoginTokens)(user);
+        return res.status(200).json({
+            message: "login successful",
+            tokens,
+        });
     };
     ConfirmEmail = async (req, res) => {
         // Destructuring
@@ -74,6 +89,9 @@ class AuthService {
             update: { confirmedAt: new Date(), $unset: { confirmEmailOtp: 1 } },
         });
         return res.status(200).json({ message: "Email confirmed successfully" });
+    };
+    user = async (req, res) => {
+        return res.status(200).json({ message: "user", data: req.user });
     };
 }
 exports.default = new AuthService();

@@ -1,4 +1,4 @@
-import { log } from "console";
+
 import type { Request, Response, NextFunction } from "express";
 import { z, type ZodError, type ZodType } from "zod";
 import { BadRequestException } from "../utils/error.response";

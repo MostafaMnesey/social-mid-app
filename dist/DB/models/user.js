@@ -1,17 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Role = exports.Gender = void 0;
 const mongoose_1 = require("mongoose");
 const mongoose_2 = require("mongoose");
 var Gender;
 (function (Gender) {
     Gender["male"] = "male";
     Gender["female"] = "female";
-})(Gender || (Gender = {}));
+})(Gender || (exports.Gender = Gender = {}));
 var Role;
 (function (Role) {
     Role["user"] = "user";
     Role["admin"] = "admin";
-})(Role || (Role = {}));
+})(Role || (exports.Role = Role = {}));
 const userSchema = new mongoose_2.Schema({
     firstName: { type: String, required: true, minLength: 3, maxLength: 30 },
     lastName: { type: String, required: true, minLength: 3, maxLength: 30 },

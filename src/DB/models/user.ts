@@ -1,38 +1,14 @@
-import e from "cors";
-import { models, Types } from "mongoose";
+import { HydratedDocument, models, Types } from "mongoose";
 import { Schema, model } from "mongoose";
-import en from "zod/v4/locales/en.cjs";
-import { fi } from "zod/v4/locales/index.cjs";
-enum Gender {
+
+import { IUser } from "../../utils/interfaces/interfaces";
+export enum Gender {
   male = "male",
   female = "female",
 }
-enum Role {
+export enum Role {
   user = "user",
   admin = "admin",
-}
-
-export interface IUser {
-  firstName: string;
-  lastName: string;
-  username?: string;
-
-
-  email: string;
-  confirmEmailOtp?: string;
-  confirmedAt?: Date;
-
-  password: string;
-  resetPasswordOtp?: string;
-  changeCredentialsTime?: Date;
-
-  phone?: string;
-  address?: string;
-  gender: Gender;
-  role: Role;
-
-  createdAt: Date;
-  updatedAt?: Date;
 }
 
 const userSchema = new Schema<IUser>(
@@ -69,3 +45,4 @@ userSchema
 
 const UserModel = models.User || model<IUser>("User", userSchema);
 export default UserModel;
+export type HydUserDoc = HydratedDocument<IUser>;
