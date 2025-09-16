@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.globalErrorHandler = exports.ConflictException = exports.BadRequestException = exports.NotFoundException = exports.ApplicationException = void 0;
+exports.globalErrorHandler = exports.UnauthorizedException = exports.ForbiddenException = exports.ConflictException = exports.BadRequestException = exports.NotFoundException = exports.ApplicationException = void 0;
 class ApplicationException extends Error {
     statusCode = 500;
     constructor(message, statusCode, cause) {
@@ -33,6 +33,22 @@ class ConflictException extends ApplicationException {
     }
 }
 exports.ConflictException = ConflictException;
+class ForbiddenException extends ApplicationException {
+    constructor(message, cause) {
+        super(message, 403, cause);
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+exports.ForbiddenException = ForbiddenException;
+class UnauthorizedException extends ApplicationException {
+    constructor(message, cause) {
+        super(message, 401, cause);
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+exports.UnauthorizedException = UnauthorizedException;
 const globalErrorHandler = (err, req, res, next) => {
     return res.status(err.statusCode || 500).json({
         error: "Internal server error",

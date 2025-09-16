@@ -1,20 +1,14 @@
+import { HTokenDoc, TokenModel } from "./../../DB/models/Token";
 import { sign, verify } from "jsonwebtoken";
 import type { JwtPayload, Secret, SignOptions } from "jsonwebtoken";
 import type { HydUserDoc } from "../../DB/models/user";
-import UserModel, { Role } from "../../DB/models/user";
-import { access } from "fs";
-import { log } from "console";
-import { BadRequestException } from "../error.response";
-import { UserRepository } from "../../DB/Repos/UserRepository";
+import UserModel from "../../DB/models/user";
 
-export enum signturesLevelEnum {
-  system = "system",
-  Bearer = "Bearer",
-}
-export enum TokenType {
-  access = "access",
-  refresh = "refresh",
-}
+import { BadRequestException, UnauthorizedException } from "../error.response";
+import { UserRepository } from "../../DB/Repos/UserRepository";
+import { Role, signturesLevelEnum, TokenType } from "../Types/Enums";
+import { v4 as uuid } from "uuid";
+import { TokenRepository } from "../../DB/Repos/TokenRepository";
 
 export const generateToken = ({
   payload,
@@ -61,6 +55,7 @@ export const signturesLevel = async (
 };
 
 const model = new UserRepository(UserModel);
+const TModel = new TokenRepository(TokenModel);
 export const getSignatures = async (
   signturesLevel: signturesLevelEnum = signturesLevelEnum.Bearer
 ) => {
@@ -85,19 +80,27 @@ export const getSignatures = async (
 
 export const createLoginTokens = async (user: HydUserDoc) => {
   const userType = await signturesLevel(user.role);
-  log(userType);
+
   const { access, refresh } = await getSignatures(userType);
-  log({ access, refresh });
+  console.log({
+    access: process.env.JWT_EXPIRES_IN_ACCESS,
+    refresh: process.env.JWT_EXPIRES_IN_REFRESH,
+  });
 
   const AccessToken = generateToken({
     payload: { _id: user._id },
     secret: access,
+    options: {
+      expiresIn: Number(process.env.JWT_EXPIRES_IN_ACCESS),
+      jwtid: uuid(),
+    },
   });
   const refreshToken = generateToken({
     payload: { _id: user._id },
     secret: refresh,
     options: {
       expiresIn: Number(process.env.JWT_EXPIRES_IN_REFRESH),
+      jwtid: uuid(),
     },
   });
   return { AccessToken, refreshToken };
@@ -124,14 +127,12 @@ export const decodeToken = async ({
     });
   }
   const signature = await getSignatures(Bearer as signturesLevelEnum);
-  console.log({ signature, tokenType });
 
   const decoded = await verifyToken({
     token,
     secret:
       tokenType === TokenType.access ? signature.access : signature.refresh,
   });
-  console.log(decoded);
 
   if (!decoded.iat || !decoded._id) {
     throw new BadRequestException("Validation Error", {
@@ -145,10 +146,35 @@ export const decodeToken = async ({
     });
   }
 
+  if (await TModel.findOne({ filter: { jti: decoded?.jti } })) {
+    throw new UnauthorizedException("Validation Error", {
+      key: "authration",
+      errors: [
+        {
+          message: "authration is invalid",
+          path: "authration",
+        },
+      ],
+    });
+  }
   const user = await model.findOne({
-    filter: { _id: decoded._id },
-  });
+    filter: { _id: decoded?._id },
+  })
 
+  console.log(
+    (user?.changeCredentialsTime?.getTime() || 0) > decoded.iat * 1000
+  );
+  if ((user?.changeCredentialsTime?.getTime() || 0) > decoded.iat * 1000) {
+    throw new UnauthorizedException("Validation Error", {
+      key: "authration",
+      errors: [
+        {
+          message: "authration is invalid",
+          path: "authration",
+        },
+      ],
+    });
+  }
   if (!user) {
     throw new BadRequestException("Validation Error", {
       key: "authration",
@@ -162,4 +188,24 @@ export const decodeToken = async ({
   }
 
   return { user, decoded };
+};
+
+export const revokeToken = async (decoded: JwtPayload): Promise<HTokenDoc> => {
+  const tokenModel = new TokenRepository(TokenModel);
+  const [result] =
+    (await tokenModel.create({
+      data: [
+        {
+          jti: decoded?.jti as string,
+          expiresIn:
+            (decoded?.exp || 0) + Number(process.env.JWT_EXPIRES_IN_ACCESS),
+          userId: decoded?._id,
+        },
+      ],
+    })) || [];
+  if (!result) {
+    throw new BadRequestException("Cannot revoke token");
+  }
+
+  return result;
 };

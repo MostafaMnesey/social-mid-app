@@ -12,4 +12,9 @@ event.on("EmailConfirmation", (data) => {
     data.html = (0, mail_temp_1.emailTemplte)({ title: "Email confirmation", otp: data.otp });
     (0, Email_1.sendEmail)(data);
 });
+event.on("ResetPassword", (data) => {
+    data.subject = "Reset Password";
+    data.html = (0, mail_temp_1.emailTemplte)({ title: "Reset Password", otp: data.otp });
+    (0, Email_1.sendEmail)(data);
+});
 exports.default = event;

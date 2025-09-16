@@ -42,8 +42,22 @@ const validation_middleware_1 = require("../../Middlewares/validation.middleware
 const validators = __importStar(require("./auth.validation"));
 const authentication_1 = require("../../Middlewares/authentication");
 const router = (0, express_1.Router)();
+// Route for signing up a new user
 router.post("/signup", (0, validation_middleware_1.validation)(validators.signup), auth_service_1.default.signup);
+// Route for confirming user email with OTP
 router.patch("/Confirm-Email", (0, validation_middleware_1.validation)(validators.ConfirmEmail), auth_service_1.default.ConfirmEmail);
+// Route for logging in an existing user
 router.post("/login", auth_service_1.default.login);
-router.get("/user", (0, authentication_1.authentication)(), auth_service_1.default.user);
+// Route for logging out a user (requires authentication)
+router.post("/logout", (0, authentication_1.authentication)(), (0, validation_middleware_1.validation)(validators.logout), auth_service_1.default.logout);
+// Route for signing up with Google account
+router.post("/signupWithGoogle", (0, validation_middleware_1.validation)(validators.signupWithGoogle), auth_service_1.default.signupWithGoogle);
+// Route for logging in with Google account
+router.post("/loginWithGoogle", (0, validation_middleware_1.validation)(validators.signupWithGoogle), auth_service_1.default.loginWithGoogle);
+// Route for sending reset password OTP to the user’s email
+router.post("/send-reset-otp", (0, validation_middleware_1.validation)(validators.sendResetOtp), auth_service_1.default.sendResetOtp);
+// Route for verifying the reset password OTP
+router.post("/verify-reset-otp", (0, validation_middleware_1.validation)(validators.verifyResetOtp), auth_service_1.default.verifyResetOtp);
+// Route for resetting the password after OTP verification
+router.patch("/reset-Password", (0, validation_middleware_1.validation)(validators.resetPassword), auth_service_1.default.resetPassword);
 exports.default = router;

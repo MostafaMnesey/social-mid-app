@@ -8,6 +8,10 @@
     {
       "name": "Authentication",
       "description": "Endpoints related to user authentication"
+    },
+    {
+      "name": "User",
+      "description": "Endpoints related to user management"
     }
   ],
   "paths": {
@@ -77,6 +81,161 @@
             }
           }
         }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "logout",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "flag": "all"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/signupWithGoogle": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "signupWithGoogle",
+        "responses": {
+          "201": {
+            "description": "Successful response"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "idToken": "your-google-id-token"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/loginWithGoogle": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "loginWithGoogle",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "idToken": "your-google-id-token"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/send-reset-otp": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "send reset otp",
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "email": "mneseym@gmail.com"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/verify-reset-otp": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "verify reset otp",
+        "responses": {
+          "200": {
+            "description": "OTP matched"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "email": "mneseym@gmail.com",
+                "otp": "123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset-Password": {
+      "patch": {
+        "tags": ["Authentication"],
+        "summary": "reset password",
+        "responses": {
+          "200": {
+            "description": "Password reset successful"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "email": "mneseym@gmail.com",
+                "otp": "123456",
+                "password": "NewPassword123!",
+                "confirmPassword": "NewPassword123!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/refresh-token": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get new access & refresh tokens",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Tokens refreshed successfully"
+          },
+          "401": {
+            "description": "Invalid or expired refresh token"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

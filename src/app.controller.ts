@@ -4,19 +4,20 @@ import { config } from "dotenv";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import swaggerUi from "swagger-ui-express";
+import morgan from "morgan";
 //express & types
 import express from "express";
 import type { NextFunction, Request, Response } from "express";
 import swaggerDocument from "../Docs/social_app_swagger.json";
 
 //core
-import path from "node:path";
+import { resolve } from "path";
+
 //controllers
 import authController from "./Modules/Auth/auth.controller";
-import { resolve } from "path";
+import userController from "./Modules/User/user.controller";
 import { globalErrorHandler } from "./utils/error.response";
 import DbConnection from "./DB/Connection.db";
-
 //configurations & constants
 config({ path: resolve("./config/.env.development") });
 //rate limiter
@@ -31,17 +32,18 @@ const limiter = rateLimit({
 //bootstrap function starting point of the app
 const bootstrap = async (): Promise<void> => {
   //port number
-  const port: number | string = process.env.PORT || 5000;
+  const port: number | string = /* process.env.PORT || */ 3001;
   //express app
   const app = express();
   //Third-party-middlewares
-  app.use(express.json(), cors(), helmet(), limiter);
+  app.use(express.json(), cors(), helmet(), morgan("dev"), limiter);
 
   //Application routes
   app.use("/auth", authController);
+  app.use("/user", userController);
 
   // swagger docs
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use("/api", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   // invalid route
   app.use("{/*dummy}", (req: Request, res: Response) => {
     return res.status(404).json({ error: "Invalid route" });

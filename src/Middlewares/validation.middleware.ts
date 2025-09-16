@@ -46,3 +46,4 @@ export const generalField = {
   confirmPassword: z.string().min(6),
   otp: z.string().regex(/^\d{6}$/g),
 };
+

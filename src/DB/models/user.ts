@@ -1,15 +1,9 @@
+import { provider } from "./../../utils/Types/Enums";
 import { HydratedDocument, models, Types } from "mongoose";
 import { Schema, model } from "mongoose";
 
-import { IUser } from "../../utils/interfaces/interfaces";
-export enum Gender {
-  male = "male",
-  female = "female",
-}
-export enum Role {
-  user = "user",
-  admin = "admin",
-}
+import { IUser } from "../../utils/Types/interfaces";
+import { Gender, Role } from "../../utils/Types/Enums";
 
 const userSchema = new Schema<IUser>(
   {
@@ -20,9 +14,15 @@ const userSchema = new Schema<IUser>(
     confirmEmailOtp: { type: String },
     confirmedAt: { type: Date },
 
-    password: { type: String, required: true },
+    password: {
+      type: String,
+      required: function (this: IUser) {
+        return this.provider === provider.system;
+      },
+    },
     resetPasswordOtp: { type: String },
     changeCredentialsTime: { type: Date },
+    provider: { type: String, enum: provider, default: provider.system },
 
     phone: { type: String },
     address: { type: String },

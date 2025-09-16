@@ -1,4 +1,3 @@
-import { fi } from "zod/v4/locales/index.cjs";
 import {
   CreateOptions,
   FlattenMaps,
@@ -13,10 +12,9 @@ import {
   UpdateQuery,
   UpdateWriteOpResult,
 } from "mongoose";
-import { BadRequestException } from "../../utils/error.response";
-import { promises } from "dns";
 
-type lea<T> = HydratedDocument<FlattenMaps<T>>;
+
+type lean<T> = HydratedDocument<FlattenMaps<T>>;
 export abstract class DBRepository<TDoc> {
   constructor(protected readonly model: Model<TDoc>) {}
 
@@ -38,7 +36,7 @@ export abstract class DBRepository<TDoc> {
     filter?: RootFilterQuery<TDoc>;
     select?: ProjectionType<TDoc> | null;
     options?: QueryOptions<TDoc> | null;
-  }): Promise<lea<TDoc> | HydratedDocument<TDoc> | null> {
+  }): Promise<lean<TDoc> | HydratedDocument<TDoc> | null> {
     const doc = this.model.findOne(filter).select(select || "");
     if (options?.populate) {
       doc.populate(options.populate as PopulateOptions[]);

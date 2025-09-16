@@ -1,6 +1,7 @@
-
 import z from "zod";
 import { generalField } from "../../Middlewares/validation.middleware";
+import { LoginFlag } from "../../utils/Types/Enums";
+import { id } from "zod/v4/locales/index.cjs";
 
 export const login = {
   body: z
@@ -44,9 +45,49 @@ export const signup = {
       }
     }),
 };
-export const ConfirmEmail={
-  body:z.strictObject({
-    email:generalField.email,
-    otp:generalField.otp
-  })
-}
+export const ConfirmEmail = {
+  body: z.strictObject({
+    email: generalField.email,
+    otp: generalField.otp,
+  }),
+};
+
+export const logout = {
+  body: z.strictObject({
+    flag: z.enum(LoginFlag).default(LoginFlag.only),
+  }),
+};
+
+export const signupWithGoogle = {
+  body: z.strictObject({
+    idToken: z.string(),
+  }),
+};
+
+export const sendResetOtp = {
+  body: z.strictObject({
+    email: generalField.email,
+  }),
+};
+export const verifyResetOtp = {
+  body: z.strictObject({
+    email: generalField.email,
+    otp: generalField.otp,
+  }),
+};
+export const resetPassword = {
+  body: verifyResetOtp.body
+    .safeExtend({
+      password: generalField.password,
+      confirmPassword: generalField.confirmPassword,
+    })
+    .refine(
+      (data) => {
+        return data.password === data.confirmPassword;
+      },
+      {
+        message: "passwords do not match",
+        path: ["confirmPassword"],
+      }
+    ),
+};

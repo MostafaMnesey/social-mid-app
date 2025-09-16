@@ -1,7 +1,6 @@
 import { log } from "console";
 import { Request, Response, NextFunction } from "express";
-import { IError } from "./interfaces/interfaces";
-
+import { IError } from "./Types/interfaces";
 
 export class ApplicationException extends Error {
   statusCode: number = 500;
@@ -32,6 +31,20 @@ export class BadRequestException extends ApplicationException {
 export class ConflictException extends ApplicationException {
   constructor(message: string, cause?: unknown) {
     super(message, 409, cause);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+export class ForbiddenException extends ApplicationException {
+  constructor(message: string, cause?: unknown) {
+    super(message, 403, cause);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+export class UnauthorizedException extends ApplicationException {
+  constructor(message: string, cause?: unknown) {
+    super(message, 401, cause);
     this.name = this.constructor.name;
     Error.captureStackTrace(this, this.constructor);
   }

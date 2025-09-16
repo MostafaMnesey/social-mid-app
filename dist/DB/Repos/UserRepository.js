@@ -9,7 +9,7 @@ class UserRepository extends DBRepository_1.DBRepository {
         super(model);
         this.model = model;
     }
-    async createUser(data, options) {
+    async createUser({ data, options }) {
         const user = (await this.create({ data, options })) || [];
         if (!user) {
             throw new error_response_1.BadRequestException("User creation failed");
