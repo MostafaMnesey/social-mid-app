@@ -26,3 +26,8 @@ export enum provider {
   google = "google",
   system = "system",
 }
+
+export enum StorageEnum {
+  memory = "memory",
+  disk = "disk",
+}
